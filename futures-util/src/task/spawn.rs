@@ -46,6 +46,7 @@ pub trait SpawnExt: Spawn {
     /// # std::thread::sleep(std::time::Duration::from_millis(500)); // wait for background threads closed: https://github.com/rust-lang/miri/issues/1371
     /// ```
     #[cfg(feature = "alloc")]
+    #[track_caller]
     fn spawn<Fut>(&self, future: Fut) -> Result<(), SpawnError>
     where
         Fut: Future<Output = ()> + Send + 'static,
@@ -77,6 +78,7 @@ pub trait SpawnExt: Spawn {
     #[cfg(feature = "channel")]
     #[cfg_attr(docsrs, doc(cfg(feature = "channel")))]
     #[cfg(feature = "std")]
+    #[track_caller]
     fn spawn_with_handle<Fut>(&self, future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
     where
         Fut: Future + Send + 'static,
@@ -91,6 +93,7 @@ pub trait SpawnExt: Spawn {
     /// Requires the `compat` feature to enable.
     #[cfg(feature = "compat")]
     #[cfg_attr(docsrs, doc(cfg(feature = "compat")))]
+    #[track_caller]
     fn compat(self) -> Compat<Self>
     where
         Self: Sized,
@@ -127,6 +130,7 @@ pub trait LocalSpawnExt: LocalSpawn {
     /// spawner.spawn_local(future).unwrap();
     /// ```
     #[cfg(feature = "alloc")]
+    #[track_caller]
     fn spawn_local<Fut>(&self, future: Fut) -> Result<(), SpawnError>
     where
         Fut: Future<Output = ()> + 'static,
@@ -155,6 +159,7 @@ pub trait LocalSpawnExt: LocalSpawn {
     #[cfg(feature = "channel")]
     #[cfg_attr(docsrs, doc(cfg(feature = "channel")))]
     #[cfg(feature = "std")]
+    #[track_caller]
     fn spawn_local_with_handle<Fut>(
         &self,
         future: Fut,

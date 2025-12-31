@@ -12,6 +12,7 @@ pub trait Spawn {
     /// represent relatively rare scenarios, such as the executor
     /// having been shut down so that it is no longer able to accept
     /// tasks.
+    #[track_caller]
     fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError>;
 
     /// Determines whether the executor is able to spawn new tasks.
@@ -21,6 +22,7 @@ pub trait Spawn {
     /// Likewise, an `Err` return means that `spawn` is likely, but
     /// not guaranteed, to yield an error.
     #[inline]
+    #[track_caller]
     fn status(&self) -> Result<(), SpawnError> {
         Ok(())
     }
@@ -37,6 +39,7 @@ pub trait LocalSpawn {
     /// represent relatively rare scenarios, such as the executor
     /// having been shut down so that it is no longer able to accept
     /// tasks.
+    #[track_caller]
     fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError>;
 
     /// Determines whether the executor is able to spawn new tasks.
@@ -46,6 +49,7 @@ pub trait LocalSpawn {
     /// Likewise, an `Err` return means that `spawn` is likely, but
     /// not guaranteed, to yield an error.
     #[inline]
+    #[track_caller]
     fn status_local(&self) -> Result<(), SpawnError> {
         Ok(())
     }
@@ -84,40 +88,48 @@ impl SpawnError {
 }
 
 impl<Sp: ?Sized + Spawn> Spawn for &Sp {
+    #[track_caller]
     fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
         Sp::spawn_obj(self, future)
     }
 
+    #[track_caller]
     fn status(&self) -> Result<(), SpawnError> {
         Sp::status(self)
     }
 }
 
 impl<Sp: ?Sized + Spawn> Spawn for &mut Sp {
+    #[track_caller]
     fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
         Sp::spawn_obj(self, future)
     }
 
+    #[track_caller]
     fn status(&self) -> Result<(), SpawnError> {
         Sp::status(self)
     }
 }
 
 impl<Sp: ?Sized + LocalSpawn> LocalSpawn for &Sp {
+    #[track_caller]
     fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError> {
         Sp::spawn_local_obj(self, future)
     }
 
+    #[track_caller]
     fn status_local(&self) -> Result<(), SpawnError> {
         Sp::status_local(self)
     }
 }
 
 impl<Sp: ?Sized + LocalSpawn> LocalSpawn for &mut Sp {
+    #[track_caller]
     fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError> {
         Sp::spawn_local_obj(self, future)
     }
 
+    #[track_caller]
     fn status_local(&self) -> Result<(), SpawnError> {
         Sp::status_local(self)
     }
@@ -129,40 +141,48 @@ mod if_alloc {
     use alloc::{boxed::Box, rc::Rc};
 
     impl<Sp: ?Sized + Spawn> Spawn for Box<Sp> {
+        #[track_caller]
         fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_obj(future)
         }
 
+        #[track_caller]
         fn status(&self) -> Result<(), SpawnError> {
             (**self).status()
         }
     }
 
     impl<Sp: ?Sized + LocalSpawn> LocalSpawn for Box<Sp> {
+        #[track_caller]
         fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_local_obj(future)
         }
 
+        #[track_caller]
         fn status_local(&self) -> Result<(), SpawnError> {
             (**self).status_local()
         }
     }
 
     impl<Sp: ?Sized + Spawn> Spawn for Rc<Sp> {
+        #[track_caller]
         fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_obj(future)
         }
 
+        #[track_caller]
         fn status(&self) -> Result<(), SpawnError> {
             (**self).status()
         }
     }
 
     impl<Sp: ?Sized + LocalSpawn> LocalSpawn for Rc<Sp> {
+        #[track_caller]
         fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_local_obj(future)
         }
 
+        #[track_caller]
         fn status_local(&self) -> Result<(), SpawnError> {
             (**self).status_local()
         }
@@ -170,10 +190,12 @@ mod if_alloc {
 
     #[cfg_attr(target_os = "none", cfg(target_has_atomic = "ptr"))]
     impl<Sp: ?Sized + Spawn> Spawn for alloc::sync::Arc<Sp> {
+        #[track_caller]
         fn spawn_obj(&self, future: FutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_obj(future)
         }
 
+        #[track_caller]
         fn status(&self) -> Result<(), SpawnError> {
             (**self).status()
         }
@@ -181,10 +203,12 @@ mod if_alloc {
 
     #[cfg_attr(target_os = "none", cfg(target_has_atomic = "ptr"))]
     impl<Sp: ?Sized + LocalSpawn> LocalSpawn for alloc::sync::Arc<Sp> {
+        #[track_caller]
         fn spawn_local_obj(&self, future: LocalFutureObj<'static, ()>) -> Result<(), SpawnError> {
             (**self).spawn_local_obj(future)
         }
 
+        #[track_caller]
         fn status_local(&self) -> Result<(), SpawnError> {
             (**self).status_local()
         }
